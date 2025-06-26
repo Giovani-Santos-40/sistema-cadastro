@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+ <meta charset="UTF-8">
+ <title>Cadastro de Produtos</title>
+ <style>
+  * {
+    box-sizing: border-box;
+   }
+
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+   }
+
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+   }
+
+   h1 {
+    text-align: center;
+    margin-bottom: 30px;
+   }
+
+   form input, form button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+   }
+
+   form button {
+    background-color: #28a745;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+   }
+   
+   form button:hover {
+    background-color: #218838;
+   }
+
+   table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+   }
+
+   th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+   }
+
+   th {
+    background-color: #eee;
+   }
+
+   .remover {
+    color: red;
+    cursor: pointer;
+    font-size: 18px;
+   }
+
+   #total {
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 18px;
+    text-align: right;
+   }
+
+   @media (max-width: 600px) {
+    form input, form button {
+    font-size: 16px;
+   }
+
+   table, th, td {
+    font-size: 14px;
+   }
+ }
+
+</style>
+</head>
+<body>
+
+  <div class="container">
+   <h1>Cadastro de Produtos</h1>
+
+   <form id="produtoForm">
+    <input type="text" id="nome" placeholder="Nome do Cliente" required>
+    <input type="text" id="produto" placeholder="Produto" required>
+    <input type="number" id="valor" placeholder="Valor" required step="0.01">
+    <button type="submit">Adicionar</button>
+   </form>
+
+   <table id="tabela">
+    <thead>
+     <tr>
+      <th>Cliente</th>
+      <th>Produto</th>
+      <th>Valor</th>
+      <th>Ação</th>
+     </tr>
+    </thead>
+   <tbody></tbody>
+   </table>
+
+   <div id="total">Total: R$ 0,00</div>
+</div>
+
+<script>
+
+   const form = document.getElementById('produtoForm');
+   const tabela = document.getElementById('tabela').getElementsByTagName('tbody')[0];
+   const totalDiv = document.getElementById('total');
+   let produtos = [];
+
+   window.onload = function () {
+     const armazenado = localStorage.getItem('produtos');
+     if (armazenado) {
+     produtos = JSON.parse(armazenado);
+     produtos.forEach(p => adicionarLinha(p.nome, p.produto, p.valor));
+     atualizarTotal();
+ }
+};
+
+
+   form.addEventListener('submit', function (e) {
+   e.preventDefault();
+    const nome = document.getElementById('nome').value;
+    const produto = document.getElementById('produto').value;
+    const valor = parseFloat(document.getElementById('valor').value);
+
+    produtos.push({ nome, produto, valor, });
+    salvarLocal();
+    adicionarLinha(nome, produto, valor, );
+    atualizarTotal();
+    form.reset();
+  });
+
+ function adicionarLinha(nome, produto, valor) {
+    const novaLinha = tabela.insertRow();
+    novaLinha.insertCell(0).textContent = nome;
+    novaLinha.insertCell(1).textContent = produto;
+    novaLinha.insertCell(2).textContent = valor.toLocaleString('pt-BR', {
+     style: 'currency',
+     currency: 'BRL'
+ });
+
+    const celulaAcao = novaLinha.insertCell(3);
+    const btnRemover = document.createElement('span');
+    btnRemover.textContent = 'Remover';
+    btnRemover.classList.add('remover');
+    btnRemover.onclick = () => {
+      const index = novaLinha.rowIndex - 1;
+      produtos.splice(index, 1);
+      salvarLocal();
+      tabela.deleteRow(index);
+      atualizarTotal();
+   };
+
+   celulaAcao.appendChild(btnRemover);
+   }
+
+   function atualizarTotal() {
+      const total = produtos.reduce((soma, p) => soma + p.valor, 0);
+      totalDiv.textContent = 'Total: ' + total.toLocaleString('pt-BR',{
+       style: 'currency',
+       currency: 'BRL'
+   });
+ }
+
+   function salvarLocal() {
+     localStorage.setItem('produtos', JSON.stringify(produtos));
+   }
+
+  </script>
+</body>
+</html>
+
+   
+
+      
+    
